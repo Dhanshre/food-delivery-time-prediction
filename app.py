@@ -58,17 +58,21 @@ class DeliveryData(BaseModel):
 class PredictionResponse(BaseModel):
     predicted_delivery_time_minutes: float
 
-
 def initialize_model_pipeline() -> Pipeline:
-    """Load the registered MLflow model and local preprocessing object."""
+    """Load the local preprocessing object and trained model."""
 
     if not PREPROCESSOR_PATH.exists():
         raise FileNotFoundError(
             f"Preprocessor not found at: {PREPROCESSOR_PATH.resolve()}"
         )
-        
-preprocessor = joblib.load(PREPROCESSOR_PATH)
-regression_model = joblib.load(MODEL_PATH)  
+
+    if not MODEL_PATH.exists():
+        raise FileNotFoundError(
+            f"Model not found at: {MODEL_PATH.resolve()}"
+        )
+
+    preprocessor = joblib.load(PREPROCESSOR_PATH)
+    regression_model = joblib.load(MODEL_PATH)
 
     return Pipeline(
         steps=[
