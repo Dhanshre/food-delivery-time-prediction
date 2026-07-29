@@ -127,8 +127,8 @@ def health() -> dict[str, Any]:
     response: dict[str, Any] = {
         "status": "healthy" if ready else "unhealthy",
         "model_ready": ready,
-        "model_name": MODEL_NAME,
-        "model_version": MODEL_VERSION,
+        "model_name": "lightgbm_final_model",
+        "model_path": str(MODEL_PATH),
     }
 
     startup_error = getattr(app.state, "startup_error", None)
