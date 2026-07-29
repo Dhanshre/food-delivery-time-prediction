@@ -10,6 +10,7 @@ RUN pip install -r requirements-dockers.txt
 
 COPY app.py ./
 COPY ./models/preprocessor.joblib ./models/preprocessor.joblib
+COPY ./models/lightgbm_final_model.joblib ./models/lightgbm_final_model.joblib
 COPY ./scripts/data_clean_utils.py ./scripts/data_clean_utils.py
 
 EXPOSE 8000
