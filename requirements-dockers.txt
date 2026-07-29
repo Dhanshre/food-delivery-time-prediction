@@ -1,6 +1,6 @@
 fastapi[standard]
 uvicorn
-scikit-learn==1.5.2
+scikit-learn==1.6.1
 pandas
 numpy
 mlflow
