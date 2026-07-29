@@ -3,10 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-import dagshub
 import joblib
-import mlflow
-import mlflow.sklearn
 import pandas as pd
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -19,23 +16,6 @@ from scripts.data_clean_utils import perform_data_cleaning
 
 set_config(transform_output="pandas")
 
-
-DAGSHUB_REPO_OWNER = os.getenv("DAGSHUB_REPO_OWNER", "2024ab05194")
-DAGSHUB_REPO_NAME = os.getenv(
-    "DAGSHUB_REPO_NAME",
-    "food-delivery-time-prediction",
-)
-
-MLFLOW_TRACKING_URI = os.getenv(
-    "MLFLOW_TRACKING_URI",
-    f"https://dagshub.com/{DAGSHUB_REPO_OWNER}/{DAGSHUB_REPO_NAME}.mlflow",
-)
-
-MODEL_NAME = os.getenv(
-    "MODEL_NAME",
-    "food-delivery-stacking-regressor",
-)
-MODEL_VERSION = os.getenv("MODEL_VERSION", "2")
 
 PREPROCESSOR_PATH = Path(
     os.getenv("PREPROCESSOR_PATH", "models/preprocessor.joblib")
