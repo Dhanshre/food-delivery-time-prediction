@@ -66,18 +66,9 @@ def initialize_model_pipeline() -> Pipeline:
         raise FileNotFoundError(
             f"Preprocessor not found at: {PREPROCESSOR_PATH.resolve()}"
         )
-
-    dagshub.init(
-        repo_owner=DAGSHUB_REPO_OWNER,
-        repo_name=DAGSHUB_REPO_NAME,
-        mlflow=True,
-    )
-
-    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-
-    model_uri = f"models:/{MODEL_NAME}/{MODEL_VERSION}"
-    regression_model = mlflow.sklearn.load_model(model_uri)
-    preprocessor = joblib.load(PREPROCESSOR_PATH)
+        
+preprocessor = joblib.load(PREPROCESSOR_PATH)
+regression_model = joblib.load(MODEL_PATH)  
 
     return Pipeline(
         steps=[
