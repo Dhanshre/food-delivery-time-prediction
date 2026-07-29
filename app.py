@@ -21,6 +21,13 @@ PREPROCESSOR_PATH = Path(
     os.getenv("PREPROCESSOR_PATH", "models/preprocessor.joblib")
 )
 
+MODEL_PATH = Path(
+    os.getenv(
+        "MODEL_PATH",
+        "models/lightgbm_final_model.joblib",
+    )
+)
+
 PORT = int(os.getenv("PORT", "8000"))
 
 model_pipeline: Pipeline | None = None
