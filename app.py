@@ -1,5 +1,4 @@
 import os
-import traceback
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -36,7 +35,7 @@ MODEL_NAME = os.getenv(
     "MODEL_NAME",
     "food-delivery-stacking-regressor",
 )
-MODEL_VERSION = os.getenv("MODEL_VERSION", "1")
+MODEL_VERSION = os.getenv("MODEL_VERSION", "2")
 
 PREPROCESSOR_PATH = Path(
     os.getenv("PREPROCESSOR_PATH", "models/preprocessor.joblib")
@@ -81,20 +80,6 @@ def initialize_model_pipeline() -> Pipeline:
             f"Preprocessor not found at: {PREPROCESSOR_PATH.resolve()}"
         )
 
-    token = os.getenv("DAGSHUB_USER_TOKEN")
-
-    if not token:
-        raise RuntimeError("DAGSHUB_USER_TOKEN is not configured.")
-
-    os.environ.setdefault(
-        "MLFLOW_TRACKING_USERNAME",
-        DAGSHUB_REPO_OWNER,
-    )
-    os.environ.setdefault(
-        "MLFLOW_TRACKING_PASSWORD",
-        token,
-    )
-
     dagshub.init(
         repo_owner=DAGSHUB_REPO_OWNER,
         repo_name=DAGSHUB_REPO_NAME,
@@ -124,10 +109,9 @@ async def lifespan(app: FastAPI):
         app.state.model_ready = True
         app.state.startup_error = None
     except Exception as exc:
-        traceback.print_exc()
         model_pipeline = None
         app.state.model_ready = False
-        app.state.startup_error = f"{type(exc).__name__}: {exc}"
+        app.state.startup_error = str(exc)
 
     yield
 
@@ -140,7 +124,7 @@ app = FastAPI(
         "Predicts food delivery time using rider, order, traffic, weather, "
         "location, and delivery-context information."
     ),
-    version="1.0.1",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
@@ -187,19 +171,7 @@ def predict_delivery_time(data: DeliveryData) -> PredictionResponse:
 
     try:
         raw_data = pd.DataFrame([data.model_dump()])
-
-        # The training-time cleaning function expects the target column.
-        # A temporary value is added only so cleaning can run.
-        raw_data["time_taken"] = 0.0
-
         cleaned_data = perform_data_cleaning(raw_data)
-
-        # Remove the target before inference to avoid leakage or feature mismatch.
-        cleaned_data = cleaned_data.drop(
-            columns=["time_taken"],
-            errors="ignore",
-        )
-
         prediction = float(model_pipeline.predict(cleaned_data)[0])
 
         return PredictionResponse(
@@ -207,11 +179,9 @@ def predict_delivery_time(data: DeliveryData) -> PredictionResponse:
         )
 
     except Exception as exc:
-        traceback.print_exc()
-
         raise HTTPException(
             status_code=500,
-            detail=f"Prediction failed: {type(exc).__name__}: {exc}",
+            detail=f"Prediction failed: {exc}",
         ) from exc
 
 
