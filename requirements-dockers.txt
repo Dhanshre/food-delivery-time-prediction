@@ -8,3 +8,4 @@ joblib
 dagshub
 lightgbm
 python-multipart
+skops
